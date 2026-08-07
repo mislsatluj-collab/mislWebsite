@@ -19,10 +19,29 @@ export const metadata: Metadata = {
   title: "Misl Satluj | Punjab Politics & News",
   description: "ਮਿਸਲ ਸਤਲੁਜ ਇੱਕ ਸਮਾਜਿਕ ਅਤੇ ਰਾਜਨੀਤਿਕ ਜਥੇਬੰਦੀ ਹੈ ਜੋ ਪੰਜਾਬ ਕੇਂਦਰਿਤ ਰਾਜਨੀਤੀ ਖੜੀ ਕਰਨ ਲਈ ਵਚਨਬੱਧ ਹੈ।",
   icons: {
-    icon: "/logo.jpg",
+    icon: [
+      { url: "/logo.jpg", type: "image/jpeg" },
+      { url: "/favicon.ico" }
+    ],
+    shortcut: "/logo.jpg",
     apple: "/logo.jpg",
   },
   openGraph: {
+    title: "Misl Satluj | Punjab Politics & News",
+    description: "ਮਿਸਲ ਸਤਲੁਜ ਇੱਕ ਸਮਾਜਿਕ ਅਤੇ ਰਾਜਨੀਤਿਕ ਜਥੇਬੰਦੀ ਹੈ ਜੋ ਪੰਜਾਬ ਕੇਂਦਰਿਤ ਰਾਜਨੀਤੀ ਖੜੀ ਕਰਨ ਲਈ ਵਚਨਬੱਧ ਹੈ।",
+    images: [
+      {
+        url: "/logo.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Misl Satluj Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Misl Satluj | Punjab Politics & News",
+    description: "ਮਿਸਲ ਸਤਲੁਜ ਇੱਕ ਸਮਾਜਿਕ ਅਤੇ ਰਾਜਨੀਤਿਕ ਜਥੇਬੰਦੀ ਹੈ ਜੋ ਪੰਜਾਬ ਕੇਂਦਰਿਤ ਰਾਜਨੀਤੀ ਖੜੀ ਕਰਨ ਲਈ ਵਚਨਬੱਧ ਹੈ।",
     images: ["/logo.jpg"],
   },
 };
@@ -38,7 +57,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#f5c03b] text-[#1d2ccf] relative overflow-x-hidden">
-        {/* Continuous Animated Punjab Map Watermark Background */}
+        {/* Continuous Punjab Background Image Watermark */}
         <PunjabWatermark />
         
         <Navbar />
