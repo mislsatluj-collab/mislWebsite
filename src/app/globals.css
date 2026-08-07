@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+@theme {
+  --color-blue-main: #1d2ccf;
+  --color-blue-light: #3B82F6;
+  --color-blue-dark: #1d2ccf;
+  
+  --color-yellow-main: #f5c03b;
+  --color-yellow-light: #f7d268;
+  
+  --color-primary: var(--color-blue-main);
+  --color-primary-foreground: #ffffff;
+  
+  --color-accent: var(--color-yellow-main);
+  --color-accent-foreground: #1d2ccf;
+  
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: #f5c03b; /* Force yellow */
+  --foreground: #1d2ccf; /* Force blue */
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: var(--color-yellow-main);
+  color: #000;
+}
+
+/* Watermark Keyframe Animations */
+@keyframes watermarkFloat {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate3d(0, -14px, 0) scale(1.03) rotate(0.8deg);
+    opacity: 1;
+  }
+}
+
+@keyframes riverFlow {
+  from {
+    stroke-dashoffset: 120;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes riverFlowReverse {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: 80;
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    transform: scale(0.92);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.75;
+  }
+}
+
+@keyframes spinSuperSlow {
+  from {
+    transform: rotate(0deg);
+    transform-origin: 530px 520px;
+  }
+  to {
+    transform: rotate(360deg);
+    transform-origin: 530px 520px;
+  }
+}
+
+@keyframes spinReverse {
+  from {
+    transform: rotate(360deg);
+    transform-origin: 530px 520px;
+  }
+  to {
+    transform: rotate(0deg);
+    transform-origin: 530px 520px;
+  }
+}
+
+@keyframes pingSlow {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  60%, 100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+.animate-watermark-float {
+  animation: watermarkFloat 14s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.animate-river-flow {
+  animation: riverFlow 6s linear infinite;
+}
+
+.animate-river-flow-reverse {
+  animation: riverFlowReverse 8s linear infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 10s ease-in-out infinite;
+}
+
+.animate-spin-super-slow {
+  animation: spinSuperSlow 45s linear infinite;
+}
+
+.animate-spin-reverse {
+  animation: spinReverse 60s linear infinite;
+}
+
+.animate-ping-slow {
+  animation: pingSlow 3.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  transform-origin: center;
+}

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 900" width="100%" height="100%">
+  <defs>
+    <linearGradient id="punjabFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1d2ccf" stop-opacity="0.12" />
+      <stop offset="50%" stop-color="#1d2ccf" stop-opacity="0.06" />
+      <stop offset="100%" stop-color="#1d2ccf" stop-opacity="0.15" />
+    </linearGradient>
+  </defs>
+  {/* Outer Punjab State Silhouette */}
+  <path d="M 490,65 L 535,115 L 560,185 L 615,250 L 650,330 L 735,440 L 795,560 L 755,615 L 685,655 L 620,750 L 530,710 L 435,800 L 355,790 L 355,715 L 260,705 L 210,645 L 35,685 L 80,600 L 185,390 L 195,230 L 305,145 L 400,110 Z" fill="url(#punjabFill)" stroke="#1d2ccf" stroke-width="3.5" stroke-linejoin="round" opacity="0.85"/>
+  
+  {/* District Boundary Dividers */}
+  <g stroke="#1d2ccf" stroke-width="1.5" fill="none" stroke-dasharray="5 4" opacity="0.4">
+    <path d="M 490,65 L 465,145 L 400,110" />
+    <path d="M 465,145 L 420,270 L 305,145" />
+    <path d="M 195,230 L 290,285 L 420,270" />
+    <path d="M 560,185 L 475,330 L 420,270" />
+    <path d="M 185,390 L 300,380 L 475,330" />
+    <path d="M 300,380 L 340,490 L 260,500 L 185,390" />
+    <path d="M 340,490 L 410,480 L 475,440 L 475,330" />
+    <path d="M 475,440 L 555,430 L 615,250" />
+    <path d="M 475,440 L 560,535 L 650,525 L 685,655" />
+    <path d="M 80,600 L 210,590 L 260,500" />
+    <path d="M 210,590 L 260,705" />
+    <path d="M 260,705 L 355,715 L 410,625 L 340,490" />
+    <path d="M 355,715 L 435,800 L 500,675 L 410,625" />
+    <path d="M 500,675 L 530,710 L 620,750 L 590,625 L 560,535" />
+    <path d="M 650,330 L 680,415 L 735,440" />
+    <path d="M 680,415 L 650,525" />
+  </g>
+</svg>
