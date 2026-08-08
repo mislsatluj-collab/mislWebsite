@@ -1,12 +1,8 @@
-import { NextResponse } from "next/server";
-import mongoose from "mongoose";
 import dbConnect from "@/lib/mongodb";
 import Mission from "@/models/Mission";
 
-// Mock data for fallback
-const MOCK_MISSIONS = [
+export const seedMissions = [
   {
-    _id: "m1",
     title: "ਪੰਥਕ ਮਸਲੇ",
     slug: "panthak-masle",
     desc: "ਪੰਥਕ ਮਸਲੇ: ਸ਼੍ਰੋਮਣੀ ਗੁਰਦੁਆਰਾ ਪਰਬੰਧਕ ਕਮੇਟੀ ਦੀ ਖੁਦ-ਮੁਖਤਿਆਰੀ, ਧਰਮ ਵਿੱਚ ਸਰਕਾਰੀ ਦਖਲ-ਅੰਦਾਜੀ ਤੇ ਰੋਕ, ਆਰਟੀਕਲ 25 ਅਤੇ ਬੰਦੀ ਸਿੰਘਾਂ ਦੀ ਰਿਹਾਈ।",
@@ -35,7 +31,6 @@ const MOCK_MISSIONS = [
     order: 1
   },
   {
-    _id: "m2",
     title: "ਮਿਸਲ ਸਤਲੁਜ ਮਨੋਰਥ ਤੇ ਟੀਚਾ",
     slug: "misl-satluj-manorath-te-teacha",
     desc: "ਮਿਸਲ ਸਤਲੁਜ ਦਾ ਮੁੱਖ ਮਨੋਰਥ ਤੇ ਟੀਚਾ: ਪੰਜਾਬ ਦੀ ਸਵੈ-ਨਿਰਣੇ ਦੀ ਪ੍ਰਭੂਸੱਤਾ, ਆਰਥਿਕ ਬਹਾਲੀ, ਖੇਤੀਬਾੜੀ, ਸਿੱਖਿਆ ਅਤੇ ਸਨਅਤੀ ਇਨਕਲਾਬ।",
@@ -69,98 +64,3 @@ const MOCK_MISSIONS = [
     order: 2
   }
 ];
-
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ slug: string }> }
-) {
-  try {
-    const { slug } = await params;
-    const conn = await dbConnect();
-    
-    if (!conn) {
-      const mission = MOCK_MISSIONS.find(m => m.slug === slug || m._id === slug);
-      if (!mission) {
-        return NextResponse.json({ success: false, error: "Mission not found" }, { status: 404 });
-      }
-      return NextResponse.json({ success: true, data: mission });
-    }
-
-    let mission = null;
-    if (mongoose.Types.ObjectId.isValid(slug)) {
-      mission = await Mission.findById(slug);
-    }
-    if (!mission) {
-      mission = await Mission.findOne({ slug });
-    }
-    
-    if (!mission) {
-      return NextResponse.json({ success: false, error: "Mission not found" }, { status: 404 });
-    }
-
-    return NextResponse.json({ success: true, data: mission });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error?.message || "Failed to fetch mission" }, { status: 500 });
-  }
-}
-
-export async function PUT(
-  req: Request,
-  { params }: { params: Promise<{ slug: string }> }
-) {
-  try {
-    const { slug } = await params;
-    const body = await req.json();
-    const conn = await dbConnect();
-    
-    if (!conn) {
-      return NextResponse.json({ success: true, data: body }); // Fake success for mock
-    }
-    
-    let mission = null;
-    if (mongoose.Types.ObjectId.isValid(slug)) {
-      mission = await Mission.findByIdAndUpdate(slug, body, { new: true, runValidators: true });
-    }
-    if (!mission) {
-      mission = await Mission.findOneAndUpdate({ slug }, body, { new: true, runValidators: true });
-    }
-    
-    if (!mission) {
-      return NextResponse.json({ success: false, error: "Mission not found" }, { status: 404 });
-    }
-    
-    return NextResponse.json({ success: true, data: mission });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error?.message || "Failed to update mission" }, { status: 500 });
-  }
-}
-
-export async function DELETE(
-  req: Request,
-  { params }: { params: Promise<{ slug: string }> }
-) {
-  try {
-    const { slug } = await params;
-    const conn = await dbConnect();
-    
-    if (!conn) {
-      return NextResponse.json({ success: true }); // Fake success for mock
-    }
-    
-    let mission = null;
-    if (mongoose.Types.ObjectId.isValid(slug)) {
-      mission = await Mission.findByIdAndDelete(slug);
-    }
-    if (!mission) {
-      mission = await Mission.findOneAndDelete({ slug });
-    }
-    
-    if (!mission) {
-      return NextResponse.json({ success: false, error: "Mission not found" }, { status: 404 });
-    }
-    
-    return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error?.message || "Failed to delete mission" }, { status: 500 });
-  }
-}
