@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI;
+let MONGODB_URI = process.env.MONGODB_URI;
+
+if (MONGODB_URI && MONGODB_URI.includes("w=gzip")) {
+  MONGODB_URI = MONGODB_URI.replace("w=gzip", "w=majority");
+}
 
 if (!MONGODB_URI) {
   console.warn("Please define the MONGODB_URI environment variable inside .env.local. Using fallback memory mode for development.");

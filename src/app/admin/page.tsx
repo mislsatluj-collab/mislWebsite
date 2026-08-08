@@ -106,7 +106,12 @@ export default function Admin() {
     localStorage.removeItem("admin_token");
   };
 
-  // ================= UTILS =================
+  // ================= UTILS & FORMATTING =================
+  const insertFormatting = (setter: React.Dispatch<React.SetStateAction<string>>, currentText: string, textToInsert: string) => {
+    const spacing = currentText.length > 0 && !currentText.endsWith('\n') ? '\n' : '';
+    setter(currentText + spacing + textToInsert);
+  };
+
   const validateImageDimensions = (url: string, targetWidth: number, targetHeight: number): Promise<boolean> => {
     return new Promise((resolve) => {
       if (!url) {
@@ -450,7 +455,51 @@ export default function Admin() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Content</label>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="block text-sm font-medium">Content</label>
+                      <div className="flex gap-1 flex-wrap text-xs">
+                        <button
+                          type="button"
+                          onClick={() => insertFormatting(setContent, content, '**ਬੋਲਡ ਅੱਖਰ (Bold)**')}
+                          className="px-2 py-1 bg-primary/10 text-primary font-bold rounded hover:bg-primary/20 transition-colors"
+                          title="Add Bold Text"
+                        >
+                          B (Bold)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => insertFormatting(setContent, content, '# ਵੱਡਾ ਹੈਡਿੰਗ (Heading 1)')}
+                          className="px-2 py-1 bg-primary/10 text-primary font-bold rounded hover:bg-primary/20 transition-colors"
+                          title="Large Heading"
+                        >
+                          H1
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => insertFormatting(setContent, content, '## ਮੱਧਮ ਹੈਡਿੰਗ (Heading 2)')}
+                          className="px-2 py-1 bg-primary/10 text-primary font-bold rounded hover:bg-primary/20 transition-colors"
+                          title="Medium Heading"
+                        >
+                          H2
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => insertFormatting(setContent, content, '### ਛੋਟਾ ਹੈਡਿੰਗ (Heading 3)')}
+                          className="px-2 py-1 bg-primary/10 text-primary font-bold rounded hover:bg-primary/20 transition-colors"
+                          title="Small Heading"
+                        >
+                          H3
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => insertFormatting(setContent, content, '• ਸੂਚੀ ਬਿੰਦੂ (Bullet Item)')}
+                          className="px-2 py-1 bg-primary/10 text-primary font-bold rounded hover:bg-primary/20 transition-colors"
+                          title="Bullet List Item"
+                        >
+                          • List
+                        </button>
+                      </div>
+                    </div>
                     <textarea
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
@@ -677,12 +726,56 @@ export default function Admin() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Full Detailed Content (for specific page)</label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="block text-sm font-medium">Full Detailed Content (for specific page)</label>
+                    <div className="flex gap-1 flex-wrap text-xs">
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting(setMissionContent, missionContent, '**ਬੋਲਡ ਅੱਖਰ (Bold)**')}
+                        className="px-2 py-1 bg-primary/10 text-primary font-bold rounded hover:bg-primary/20 transition-colors"
+                        title="Add Bold Text"
+                      >
+                        B (Bold)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting(setMissionContent, missionContent, '# ਵੱਡਾ ਹੈਡਿੰਗ (Heading 1)')}
+                        className="px-2 py-1 bg-primary/10 text-primary font-bold rounded hover:bg-primary/20 transition-colors"
+                        title="Large Heading"
+                      >
+                        H1
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting(setMissionContent, missionContent, '## ਮੱਧਮ ਹੈਡਿੰਗ (Heading 2)')}
+                        className="px-2 py-1 bg-primary/10 text-primary font-bold rounded hover:bg-primary/20 transition-colors"
+                        title="Medium Heading"
+                      >
+                        H2
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting(setMissionContent, missionContent, '### ਛੋਟਾ ਹੈਡਿੰਗ (Heading 3)')}
+                        className="px-2 py-1 bg-primary/10 text-primary font-bold rounded hover:bg-primary/20 transition-colors"
+                        title="Small Heading"
+                      >
+                        H3
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting(setMissionContent, missionContent, '• ਸੂਚੀ ਬਿੰਦੂ (Bullet Item)')}
+                        className="px-2 py-1 bg-primary/10 text-primary font-bold rounded hover:bg-primary/20 transition-colors"
+                        title="Bullet List Item"
+                      >
+                        • List
+                      </button>
+                    </div>
+                  </div>
                   <textarea
                     value={missionContent}
                     onChange={(e) => setMissionContent(e.target.value)}
                     rows={8}
-                    placeholder="Enter the full article here. You can paste image URLs starting with 'http' on their own lines to embed images."
+                    placeholder="Enter full article here. Use toolbar buttons above to bold text, change font sizes, or paste image links starting with 'http' on new lines."
                     className="w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent focus:ring-2 focus:ring-primary outline-none"
                     required
                   />

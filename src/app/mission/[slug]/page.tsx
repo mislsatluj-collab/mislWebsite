@@ -73,6 +73,63 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
+function renderFormattedText(text: string) {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={index} className="font-bold text-primary">{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+}
+
+function renderContentBlocks(content: string) {
+  if (!content) return null;
+  const lines = content.split('\n');
+
+  return lines.map((line, i) => {
+    const trimmed = line.trim();
+    if (!trimmed) return <div key={i} className="h-2" />;
+
+    // Image URL check: line starts with http://, https://, or /images/
+    if (trimmed.match(/^(https?:\/\/|\/images\/)[^\s]+$/i)) {
+      return (
+        <div key={i} className="my-6">
+          <img
+            src={trimmed}
+            alt="Mission Content Image"
+            className="w-full max-h-[500px] object-cover rounded-2xl shadow-md border border-foreground/10"
+          />
+        </div>
+      );
+    }
+
+    if (trimmed.startsWith('# ')) {
+      return <h1 key={i} className="text-3xl font-bold my-5 text-foreground leading-tight">{renderFormattedText(trimmed.slice(2))}</h1>;
+    }
+    if (trimmed.startsWith('## ')) {
+      return <h2 key={i} className="text-2xl font-bold my-4 text-foreground leading-tight">{renderFormattedText(trimmed.slice(3))}</h2>;
+    }
+    if (trimmed.startsWith('### ')) {
+      return <h3 key={i} className="text-xl font-bold my-3 text-primary leading-tight">{renderFormattedText(trimmed.slice(4))}</h3>;
+    }
+
+    if (trimmed.startsWith('• ') || trimmed.startsWith('- ')) {
+      return (
+        <li key={i} className="ml-6 list-disc mb-2 text-foreground/90 leading-relaxed font-medium">
+          {renderFormattedText(trimmed.slice(2))}
+        </li>
+      );
+    }
+
+    return (
+      <p key={i} className="mb-4 text-lg text-foreground/90 leading-relaxed font-normal">
+        {renderFormattedText(trimmed)}
+      </p>
+    );
+  });
+}
+
 export default async function MissionPost({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const mission = await getMission(slug);
@@ -103,27 +160,18 @@ export default async function MissionPost({ params }: { params: Promise<{ slug: 
             
             <div className="w-20 h-1 bg-accent mb-8"></div>
             
-            <p className="text-xl text-foreground/80 font-medium mb-10 leading-relaxed italic border-l-4 border-accent pl-6">
+            <p className="text-xl text-foreground/80 font-medium mb-10 leading-relaxed not-italic border-l-4 border-accent pl-6">
               {mission.desc}
             </p>
 
             {mission.iconUrl && mission.iconUrl.startsWith('http') && (
                <div className="my-10">
-                 <Image src={mission.iconUrl} alt={mission.title} width={800} height={400} className="w-full h-auto rounded-xl object-cover max-h-[400px]" />
+                 <img src={mission.iconUrl} alt={mission.title} className="w-full h-auto rounded-2xl object-cover max-h-[400px] border border-foreground/10" />
                </div>
             )}
             
-            <div className="prose prose-lg dark:prose-invert max-w-none prose-p:leading-loose text-foreground">
-              {mission.content.split('\n').map((paragraph: string, i: number) => {
-                if (paragraph.startsWith('http') && (paragraph.endsWith('.jpg') || paragraph.endsWith('.png') || paragraph.endsWith('.jpeg'))) {
-                  return (
-                    <div key={i} className="my-8">
-                      <Image src={paragraph} alt="Content image" width={800} height={400} className="w-full rounded-xl" />
-                    </div>
-                  );
-                }
-                return <p key={i} className="mb-6">{paragraph}</p>;
-              })}
+            <div className="max-w-none text-foreground">
+              {renderContentBlocks(mission.content)}
             </div>
           </div>
         </article>
