@@ -5,7 +5,7 @@ const MissionSchema = new mongoose.Schema(
     title: {
       type: String,
       required: [true, "Please provide a title"],
-      maxlength: [100, "Title cannot be more than 100 characters"],
+      maxlength: [200, "Title cannot be more than 200 characters"],
     },
     slug: {
       type: String,
@@ -15,7 +15,7 @@ const MissionSchema = new mongoose.Schema(
     desc: {
       type: String,
       required: [true, "Please provide a short description for the card"],
-      maxlength: [200, "Description cannot be more than 200 characters"],
+      maxlength: [1000, "Description cannot be more than 1000 characters"],
     },
     content: {
       type: String,
