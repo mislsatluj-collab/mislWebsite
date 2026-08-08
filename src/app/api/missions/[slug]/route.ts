@@ -76,10 +76,15 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
+    let decodedSlug = slug;
+    try {
+      decodedSlug = decodeURIComponent(slug);
+    } catch (e) {}
+
     const conn = await dbConnect();
     
     if (!conn) {
-      const mission = MOCK_MISSIONS.find(m => m.slug === slug || m._id === slug);
+      const mission = MOCK_MISSIONS.find(m => m.slug === decodedSlug || m.slug === slug || m._id === slug);
       if (!mission) {
         return NextResponse.json({ success: false, error: "Mission not found" }, { status: 404 });
       }
@@ -89,6 +94,12 @@ export async function GET(
     let mission = null;
     if (mongoose.Types.ObjectId.isValid(slug)) {
       mission = await Mission.findById(slug);
+    }
+    if (!mission && mongoose.Types.ObjectId.isValid(decodedSlug)) {
+      mission = await Mission.findById(decodedSlug);
+    }
+    if (!mission) {
+      mission = await Mission.findOne({ slug: decodedSlug });
     }
     if (!mission) {
       mission = await Mission.findOne({ slug });
@@ -110,6 +121,11 @@ export async function PUT(
 ) {
   try {
     const { slug } = await params;
+    let decodedSlug = slug;
+    try {
+      decodedSlug = decodeURIComponent(slug);
+    } catch (e) {}
+
     const body = await req.json();
     const conn = await dbConnect();
     
@@ -120,6 +136,12 @@ export async function PUT(
     let mission = null;
     if (mongoose.Types.ObjectId.isValid(slug)) {
       mission = await Mission.findByIdAndUpdate(slug, body, { new: true, runValidators: true });
+    }
+    if (!mission && mongoose.Types.ObjectId.isValid(decodedSlug)) {
+      mission = await Mission.findByIdAndUpdate(decodedSlug, body, { new: true, runValidators: true });
+    }
+    if (!mission) {
+      mission = await Mission.findOneAndUpdate({ slug: decodedSlug }, body, { new: true, runValidators: true });
     }
     if (!mission) {
       mission = await Mission.findOneAndUpdate({ slug }, body, { new: true, runValidators: true });
@@ -141,6 +163,11 @@ export async function DELETE(
 ) {
   try {
     const { slug } = await params;
+    let decodedSlug = slug;
+    try {
+      decodedSlug = decodeURIComponent(slug);
+    } catch (e) {}
+
     const conn = await dbConnect();
     
     if (!conn) {
@@ -150,6 +177,12 @@ export async function DELETE(
     let mission = null;
     if (mongoose.Types.ObjectId.isValid(slug)) {
       mission = await Mission.findByIdAndDelete(slug);
+    }
+    if (!mission && mongoose.Types.ObjectId.isValid(decodedSlug)) {
+      mission = await Mission.findByIdAndDelete(decodedSlug);
+    }
+    if (!mission) {
+      mission = await Mission.findOneAndDelete({ slug: decodedSlug });
     }
     if (!mission) {
       mission = await Mission.findOneAndDelete({ slug });

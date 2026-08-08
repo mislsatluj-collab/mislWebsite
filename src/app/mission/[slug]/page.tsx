@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import mongoose from "mongoose";
 import dbConnect from "@/lib/mongodb";
 import Mission from "@/models/Mission";
 import Link from "next/link";
@@ -37,12 +38,56 @@ const MOCK_MISSIONS = [
   },
 ];
 
-async function getMission(slug: string) {
+async function getMission(rawSlug: string) {
   const conn = await dbConnect();
+  
+  let decodedSlug = rawSlug;
+  try {
+    decodedSlug = decodeURIComponent(rawSlug);
+  } catch (e) {}
+
+  let encodedSlug = rawSlug;
+  try {
+    encodedSlug = encodeURIComponent(decodedSlug);
+  } catch (e) {}
+
   if (!conn) {
-    return MOCK_MISSIONS.find(m => m.slug === slug);
+    return MOCK_MISSIONS.find(m => m.slug === decodedSlug || m.slug === rawSlug || m._id === rawSlug);
   }
-  return await Mission.findOne({ slug });
+
+  // 1. Try decoded slug (e.g. "ਸੰਗਠਨ-ਸੇਵਾ-ਤੇ-ਸਫ਼ਲਤਾ-8l89")
+  let mission = await Mission.findOne({ slug: decodedSlug });
+
+  // 2. Try raw slug
+  if (!mission) {
+    mission = await Mission.findOne({ slug: rawSlug });
+  }
+
+  // 3. Try encoded slug
+  if (!mission && encodedSlug !== rawSlug) {
+    mission = await Mission.findOne({ slug: encodedSlug });
+  }
+
+  // 4. Try MongoDB ObjectId
+  if (!mission && mongoose.Types.ObjectId.isValid(rawSlug)) {
+    mission = await Mission.findById(rawSlug);
+  }
+  if (!mission && mongoose.Types.ObjectId.isValid(decodedSlug)) {
+    mission = await Mission.findById(decodedSlug);
+  }
+
+  // 5. Fallback regex search for Punjabi title or slug match
+  if (!mission) {
+    const safeRegex = decodedSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    mission = await Mission.findOne({
+      $or: [
+        { slug: { $regex: new RegExp(`^${safeRegex}$`, 'i') } },
+        { title: decodedSlug }
+      ]
+    });
+  }
+
+  return mission;
 }
 
 // Generate Dynamic SEO Metadata
