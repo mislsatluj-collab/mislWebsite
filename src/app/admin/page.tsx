@@ -12,7 +12,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<'blogs' | 'videos' | 'missions'>('blogs');
+  const [activeTab, setActiveTab] = useState<'blogs' | 'videos' | 'missions' | 'settings'>('blogs');
 
   // ================= BLOGS STATE =================
   const [blogs, setBlogs] = useState<any[]>([]);
@@ -38,6 +38,14 @@ export default function Admin() {
   const [missionIconUrl, setMissionIconUrl] = useState("");
   const [editingMissionId, setEditingMissionId] = useState<string | null>(null);
 
+  // ================= SETTINGS STATE =================
+  const [heroImageUrl, setHeroImageUrl] = useState("");
+  const [aboutImageUrl, setAboutImageUrl] = useState("");
+  const [officeAddress, setOfficeAddress] = useState("");
+  const [phoneNumbers, setPhoneNumbers] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [formRecipientEmail, setFormRecipientEmail] = useState("");
+
   useEffect(() => {
     const savedToken = localStorage.getItem("admin_token");
     if (savedToken) {
@@ -45,8 +53,26 @@ export default function Admin() {
       fetchBlogs();
       fetchVideos();
       fetchMissions();
+      fetchSettings();
     }
   }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const res = await axios.get("/api/settings");
+      if (res.data.success) {
+        const d = res.data.data;
+        setHeroImageUrl(d.heroImageUrl || "/images/scraped_1.jpg");
+        setAboutImageUrl(d.aboutImageUrl || "/images/scraped_2.jpeg");
+        setOfficeAddress(d.officeAddress || "ਕਿਸਾਨ ਭਵਨ, ਸੈਕਟਰ 35\nਚੰਡੀਗੜ੍ਹ, ਪੰਜਾਬ");
+        setPhoneNumbers(d.phoneNumbers || "+91 98147 54739\n+91 89686 17046");
+        setContactEmail(d.contactEmail || "info@mislsatluj.com");
+        setFormRecipientEmail(d.formRecipientEmail || "info@mislsatluj.com");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchBlogs = async () => {
     try {
@@ -102,7 +128,12 @@ export default function Admin() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await axios.post("/api/auth/logout");
+    } catch (e) {
+      console.error(e);
+    }
     setToken(null);
     localStorage.removeItem("admin_token");
   };
@@ -316,6 +347,31 @@ export default function Admin() {
     }
   };
 
+  // ================= SETTINGS HANDLER =================
+  const handleSettingsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const payload = {
+        heroImageUrl,
+        aboutImageUrl,
+        officeAddress,
+        phoneNumbers,
+        contactEmail,
+        formRecipientEmail,
+      };
+
+      await axios.put("/api/settings", payload);
+      alert("Site settings saved successfully!");
+      fetchSettings();
+    } catch (err: any) {
+      alert("Failed to save settings. " + (err.response?.data?.error || ""));
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   if (!token) {
     return (
@@ -402,6 +458,12 @@ export default function Admin() {
             className={`px-6 py-3 rounded-xl font-bold transition-colors ${activeTab === 'missions' ? 'bg-primary text-white shadow-lg' : 'bg-background border border-foreground/10 text-foreground hover:bg-foreground/5'}`}
           >
             Manage Missions (Home Features)
+          </button>
+          <button 
+            onClick={() => setActiveTab('settings')}
+            className={`px-6 py-3 rounded-xl font-bold transition-colors ${activeTab === 'settings' ? 'bg-primary text-white shadow-lg' : 'bg-background border border-foreground/10 text-foreground hover:bg-foreground/5'}`}
+          >
+            Manage Site Settings (Images & Contact)
           </button>
         </div>
 
@@ -859,6 +921,123 @@ export default function Admin() {
               </div>
             </div>
 
+          </div>
+        )}
+
+        {/* ================= SETTINGS TAB ================= */}
+        {activeTab === 'settings' && (
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-background p-8 rounded-3xl shadow-md border border-foreground/10">
+              <h2 className="text-3xl font-bold mb-2 text-primary">Site Settings & Contact Details</h2>
+              <p className="text-foreground/60 mb-8">
+                Update home page hero image, about us image, contact details, and contact form recipient email.
+              </p>
+
+              <form onSubmit={handleSettingsSubmit} className="space-y-6">
+                {/* Images Section */}
+                <div className="p-6 bg-foreground/5 rounded-2xl border border-foreground/10 space-y-4">
+                  <h3 className="text-xl font-bold flex items-center gap-2 text-foreground">
+                    <ImageIcon size={20} className="text-primary" /> Image Settings
+                  </h3>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Home Page Hero Banner Image URL
+                    </label>
+                    <input
+                      type="text"
+                      value={heroImageUrl}
+                      onChange={(e) => setHeroImageUrl(e.target.value)}
+                      placeholder="/images/scraped_1.jpg"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent focus:ring-2 focus:ring-primary outline-none"
+                    />
+                    <p className="text-xs text-foreground/50 mt-1">Image for the main Hero section on the Home Page.</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      About Us Page Main Image URL
+                    </label>
+                    <input
+                      type="text"
+                      value={aboutImageUrl}
+                      onChange={(e) => setAboutImageUrl(e.target.value)}
+                      placeholder="/images/scraped_2.jpeg"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent focus:ring-2 focus:ring-primary outline-none"
+                    />
+                    <p className="text-xs text-foreground/50 mt-1">Image for the About Us ideology section.</p>
+                  </div>
+                </div>
+
+                {/* Contact Us Details */}
+                <div className="p-6 bg-foreground/5 rounded-2xl border border-foreground/10 space-y-4">
+                  <h3 className="text-xl font-bold flex items-center gap-2 text-foreground">
+                    Contact Us Display Details
+                  </h3>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Office Address (ਮੁੱਖ ਦਫਤਰ)</label>
+                    <textarea
+                      rows={2}
+                      value={officeAddress}
+                      onChange={(e) => setOfficeAddress(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent focus:ring-2 focus:ring-primary outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Phone Numbers (ਫੋਨ ਨੰਬਰ - one per line or separated)</label>
+                    <textarea
+                      rows={2}
+                      value={phoneNumbers}
+                      onChange={(e) => setPhoneNumbers(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent focus:ring-2 focus:ring-primary outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Public Display Email (ਈ-ਮੇਲ)</label>
+                    <input
+                      type="email"
+                      value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent focus:ring-2 focus:ring-primary outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Contact Form Submission Destination Email */}
+                <div className="p-6 bg-primary/5 rounded-2xl border border-primary/20 space-y-4">
+                  <h3 className="text-xl font-bold flex items-center gap-2 text-primary">
+                    Membership / Contact Form Destination Email
+                  </h3>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Email Address Where Contact Form Submissions Should Be Sent
+                    </label>
+                    <input
+                      type="email"
+                      value={formRecipientEmail}
+                      onChange={(e) => setFormRecipientEmail(e.target.value)}
+                      placeholder="info@mislsatluj.com"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent focus:ring-2 focus:ring-primary outline-none"
+                      required
+                    />
+                    <p className="text-xs text-foreground/70 mt-2">
+                      All new submissions filled in by users on the "Contact Us / Member Form" page will be directed to this email address.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-4 bg-primary text-white rounded-xl font-bold text-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Upload size={20} /> {loading ? "Saving Settings..." : "Save All Site Settings"}
+                </button>
+              </form>
+            </div>
           </div>
         )}
       </div>

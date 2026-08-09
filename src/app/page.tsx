@@ -13,7 +13,19 @@ export default function Home() {
   const [recentBlogs, setRecentBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [heroImageUrl, setHeroImageUrl] = useState("/images/scraped_1.jpg");
+
   useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const res = await axios.get("/api/settings");
+        if (res.data.success && res.data.data.heroImageUrl) {
+          setHeroImageUrl(res.data.data.heroImageUrl);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
     async function fetchRecentBlogs() {
       try {
         const res = await axios.get("/api/blogs");
@@ -39,6 +51,7 @@ export default function Home() {
         setMissionsLoading(false);
       }
     }
+    fetchSettings();
     fetchRecentBlogs();
     fetchMissions();
   }, []);
@@ -49,7 +62,7 @@ export default function Home() {
       <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/scraped_1.jpg"
+            src={heroImageUrl}
             alt="Misl Satluj Gathering"
             fill
             className="object-cover brightness-[0.4]"

@@ -1,8 +1,26 @@
 "use client";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 export default function About() {
+  const [aboutImageUrl, setAboutImageUrl] = useState("/images/scraped_2.jpeg");
+
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const res = await axios.get("/api/settings");
+        if (res.data.success && res.data.data.aboutImageUrl) {
+          setAboutImageUrl(res.data.data.aboutImageUrl);
+        }
+      } catch (err) {
+        console.error("Failed to fetch settings", err);
+      }
+    }
+    fetchSettings();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="bg-primary/5 py-20 border-b border-primary/10">
@@ -34,7 +52,7 @@ export default function About() {
             className="relative h-[600px] rounded-3xl overflow-hidden shadow-2xl"
           >
             <Image
-              src="/images/scraped_2.jpeg"
+              src={aboutImageUrl}
               alt="Misl Satluj History"
               fill
               className="object-cover"

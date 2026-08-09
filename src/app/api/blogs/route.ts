@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Blog from "@/models/Blog";
+import { verifyAdminAuth } from "@/lib/auth";
 
-// Mock data for when MongoDB is not configured
 const MOCK_BLOGS = [
   {
     _id: "1",
@@ -12,15 +12,6 @@ const MOCK_BLOGS = [
     content: "ਪੂਰਾ ਕੰਟੈਂਟ ਇੱਥੇ ਆਵੇਗਾ...",
     imageUrl: "/images/scraped_2.jpeg",
     publishedAt: new Date().toISOString()
-  },
-  {
-    _id: "2",
-    title: "ਮਾਘੀ ਦੇ ਪਵਿੱਤਰ ਦਿਹਾੜੇ ਤੇ ਸ੍ਰੀ ਮੁਕਤਸਰ ਸਾਹਿਬ ਪੜਾਅ",
-    slug: "maghi-diwas-sri-muktsar-sahib",
-    excerpt: "ਚਾਲੀ ਮੁਕਤਿਆਂ ਦੀ ਧਰਤੀ ਸ੍ਰੀ ਮੁਕਤਸਰ ਸਾਹਿਬ ਵਿਖੇ ਮਾਘੀ ਦੇ ਪਾਵਨ ਦਿਵਸ ਤੇ ਮਿਸਲ ਸਤਲੁਜ ਵਲੋਂ ਪੰਜਾਬ ਦੇ ਅਸਲ ਮੁੱਦਿਆਂ ਤੇ ਹੱਕੀ ਮੰਗਾਂ ਪ੍ਰਤੀ ਸੰਗਤਾਂ ਨੂੰ ਜਾਗਰੂਕ ਕਰਨ ਲਈ ਪੜਾਅ ਲਾਇਆ ਗਿਆ।",
-    content: "ਪੂਰਾ ਕੰਟੈਂਟ ਇੱਥੇ ਆਵੇਗਾ...",
-    imageUrl: "/images/scraped_3.jpeg",
-    publishedAt: new Date(Date.now() - 86400000).toISOString()
   }
 ];
 
@@ -34,13 +25,11 @@ function generateSlug(title: string) {
 export async function GET() {
   try {
     const conn = await dbConnect();
-    
     if (!conn) {
-      // Fallback to mock data if no DB connection
       return NextResponse.json({ success: true, data: MOCK_BLOGS });
     }
 
-    const blogs = await Blog.find({}).sort({ publishedAt: -1 });
+    const blogs = await Blog.find({}).sort({ publishedAt: -1 }).lean();
     return NextResponse.json({ success: true, data: blogs });
   } catch (error) {
     return NextResponse.json({ success: false, error: "Failed to fetch blogs" }, { status: 500 });
@@ -49,15 +38,22 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    // Backend Authorization Enforcement
+    const { authenticated } = await verifyAdminAuth(req);
+    if (!authenticated) {
+      return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 401 });
+    }
+
     const conn = await dbConnect();
-    
     if (!conn) {
-      return NextResponse.json({ success: false, error: "Database not configured" }, { status: 500 });
+      return NextResponse.json({ success: false, error: "Database not connected" }, { status: 500 });
     }
 
     const body = await req.json();
-    
-    // Generate a unique slug based on title if not provided
+    if (!body.title || !body.content) {
+      return NextResponse.json({ success: false, error: "Title and content are required" }, { status: 400 });
+    }
+
     if (!body.slug && body.title) {
       body.slug = generateSlug(body.title);
     }
@@ -67,9 +63,8 @@ export async function POST(req: Request) {
     }
 
     const blog = await Blog.create(body);
-    
     return NextResponse.json({ success: true, data: blog }, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return NextResponse.json({ success: false, error: "Failed to create blog" }, { status: 400 });
   }
 }
