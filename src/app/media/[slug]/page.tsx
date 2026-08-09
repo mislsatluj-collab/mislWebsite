@@ -29,14 +29,21 @@ const MOCK_BLOGS = [
 ];
 
 async function getBlog(slug: string) {
+  const decodedSlug = decodeURIComponent(slug);
   const conn = await dbConnect();
   if (!conn) {
-    return MOCK_BLOGS.find(b => b.slug === slug);
+    return MOCK_BLOGS.find(b => b.slug === slug || b.slug === decodedSlug || b._id === slug);
   }
-  return await Blog.findOne({ slug });
+  return await Blog.findOne({
+    $or: [
+      { slug: slug },
+      { slug: decodedSlug },
+      ...(slug.match(/^[0-9a-fA-F]{24}$/) ? [{ _id: slug }] : [])
+    ]
+  });
 }
 
-// Generate Dynamic SEO Metadata
+// Generate Dynamic SEO Metadata automatically
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const blog = await getBlog(slug);
@@ -48,22 +55,51 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mislsatluj.org";
+  const canonicalUrl = `${siteUrl}/media/${encodeURIComponent(blog.slug || slug)}`;
+  const publishDate = blog.publishedAt ? new Date(blog.publishedAt).toISOString() : new Date().toISOString();
+
   return {
-    title: `${blog.title} | Misl Satluj`,
+    title: `${blog.title} | Misl Satluj (ਮਿਸਲ ਸਤਲੁਜ)`,
     description: blog.excerpt,
+    keywords: [
+      blog.title,
+      "Misl Satluj",
+      "ਮਿਸਲ ਸਤਲੁਜ",
+      "Punjab News",
+      "ਪੰਜਾਬ ਖ਼ਬਰਾਂ",
+      "Panthak News"
+    ],
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: blog.title,
       description: blog.excerpt,
-      images: blog.imageUrl ? [blog.imageUrl] : [],
+      url: canonicalUrl,
+      siteName: "Misl Satluj",
+      locale: "pa_IN",
       type: "article",
-      publishedTime: new Date(blog.publishedAt).toISOString(),
+      publishedTime: publishDate,
+      images: blog.imageUrl ? [{ url: blog.imageUrl, alt: blog.title }] : [],
     },
     twitter: {
       card: "summary_large_image",
       title: blog.title,
       description: blog.excerpt,
       images: blog.imageUrl ? [blog.imageUrl] : [],
-    }
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
   };
 }
 

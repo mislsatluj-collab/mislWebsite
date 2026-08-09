@@ -30,18 +30,19 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
+    const decodedSlug = decodeURIComponent(slug);
     const conn = await dbConnect();
     
     if (!conn) {
       // Return mock data if MongoDB is not connected
-      const blog = MOCK_BLOGS.find(b => b.slug === slug);
+      const blog = MOCK_BLOGS.find(b => b.slug === slug || b.slug === decodedSlug);
       if (!blog) {
         return NextResponse.json({ success: false, error: "Blog not found" }, { status: 404 });
       }
       return NextResponse.json({ success: true, data: blog });
     }
 
-    const blog = await Blog.findOne({ slug });
+    const blog = await Blog.findOne({ $or: [{ slug: slug }, { slug: decodedSlug }] });
     
     if (!blog) {
       return NextResponse.json({ success: false, error: "Blog not found" }, { status: 404 });
@@ -60,6 +61,9 @@ export async function PUT(
   try {
     const { slug } = await params;
     const body = await req.json();
+    if (body.publishedAt) {
+      body.publishedAt = new Date(body.publishedAt);
+    }
     const conn = await dbConnect();
     
     if (!conn) {

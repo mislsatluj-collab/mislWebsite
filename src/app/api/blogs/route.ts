@@ -25,11 +25,10 @@ const MOCK_BLOGS = [
 ];
 
 function generateSlug(title: string) {
-  // Simple slugifier that supports unicode (Punjabi/Gurmukhi) by just replacing spaces and removing basic punctuation
-  let slug = title.trim().replace(/\s+/g, '-').replace(/[?|!.,'"#@^&%*()\[\]{}+=<>]/g, '');
-  // Append a small random string to ensure uniqueness if titles are same
+  let cleaned = title.trim().replace(/\s+/g, '-').replace(/[?|!.,'"#@^&%*()\[\]{}+=<>]/g, '');
+  const encoded = encodeURIComponent(cleaned);
   const randomStr = Math.random().toString(36).substring(2, 6);
-  return `${slug}-${randomStr}`;
+  return `${encoded}-${randomStr}`;
 }
 
 export async function GET() {
@@ -58,9 +57,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     
-    // Generate a unique slug based on title
+    // Generate a unique slug based on title if not provided
     if (!body.slug && body.title) {
       body.slug = generateSlug(body.title);
+    }
+
+    if (body.publishedAt) {
+      body.publishedAt = new Date(body.publishedAt);
     }
 
     const blog = await Blog.create(body);

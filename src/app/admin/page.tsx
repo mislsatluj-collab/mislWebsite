@@ -20,6 +20,7 @@ export default function Admin() {
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [publishedAt, setPublishedAt] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
 
   // ================= VIDEOS STATE =================
@@ -148,6 +149,7 @@ export default function Admin() {
     setExcerpt(blog.excerpt);
     setContent(blog.content);
     setImageUrl(blog.imageUrl || "");
+    setPublishedAt(blog.publishedAt ? new Date(blog.publishedAt).toISOString().split('T')[0] : "");
   };
 
   const cancelEdit = () => {
@@ -156,6 +158,7 @@ export default function Admin() {
     setExcerpt("");
     setContent("");
     setImageUrl("");
+    setPublishedAt("");
   };
 
   const handleDelete = async (id: string) => {
@@ -179,11 +182,16 @@ export default function Admin() {
     setLoading(true);
     
     try {
+      const payload: any = { title, excerpt, content, imageUrl };
+      if (publishedAt) {
+        payload.publishedAt = publishedAt;
+      }
+
       if (editingId) {
-        await axios.put(`/api/blogs/${editingId}`, { title, excerpt, content, imageUrl });
+        await axios.put(`/api/blogs/${editingId}`, payload);
         alert("Blog updated successfully!");
       } else {
-        await axios.post("/api/blogs", { title, excerpt, content, imageUrl });
+        await axios.post("/api/blogs", payload);
         alert("Blog created successfully!");
       }
       cancelEdit();
@@ -424,6 +432,16 @@ export default function Admin() {
                       className="w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent focus:ring-2 focus:ring-primary outline-none"
                       required
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Publication Date (ਖ਼ਬਰ/ਪੋਸਟ ਦੀ ਮਿਤੀ - Enter past or custom date)</label>
+                    <input
+                      type="date"
+                      value={publishedAt}
+                      onChange={(e) => setPublishedAt(e.target.value)}
+                      className="w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent focus:ring-2 focus:ring-primary outline-none"
+                    />
+                    <p className="text-xs text-foreground/50 mt-1">If left empty, today's date will be used automatically.</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">Image URL <span className="text-red-500 font-bold ml-2">(Required Dimensions: 1280x720)</span></label>
