@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -40,6 +41,22 @@ export default function Media() {
   const [videos, setVideos] = useState<MediaVideoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (selectedBlog) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selectedBlog]);
 
   useEffect(() => {
     async function fetchData() {
@@ -219,89 +236,92 @@ export default function Media() {
       </div>
 
       {/* Big Popup Window / Modal for Blog Post Details */}
-      <AnimatePresence>
-        {selectedBlog && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10 overflow-y-auto">
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedBlog(null)}
-              className="fixed inset-0 bg-black/75 backdrop-blur-md"
-            />
+      {mounted && createPortal(
+        <AnimatePresence>
+          {selectedBlog && (
+            <div className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 md:p-10 overflow-y-auto">
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setSelectedBlog(null)}
+                className="fixed inset-0 bg-black/80 backdrop-blur-md z-0"
+              />
 
-            {/* Modal Dialog Content */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative w-full max-w-4xl max-h-[90vh] bg-background text-foreground rounded-3xl shadow-2xl border border-foreground/10 overflow-y-auto z-10 flex flex-col"
-            >
-              {/* Sticky Header with Close Button */}
-              <div className="sticky top-0 z-20 flex items-center justify-between p-4 md:p-6 bg-background/90 backdrop-blur-md border-b border-foreground/10">
-                <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-primary">
-                  ਖ਼ਬਰਾਂ ਤੇ ਬਲਾਗ (Blog Post)
-                </span>
-                <button
-                  onClick={() => setSelectedBlog(null)}
-                  className="p-2 rounded-full hover:bg-foreground/10 text-foreground/70 hover:text-foreground transition-colors"
-                  aria-label="Close"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              {/* Modal Body */}
-              <div className="p-6 md:p-10 space-y-6">
-                {selectedBlog.imageUrl && (
-                  <div className="relative w-full h-[280px] sm:h-[380px] md:h-[450px] rounded-2xl overflow-hidden shadow-md">
-                    <Image
-                      src={selectedBlog.imageUrl}
-                      alt={selectedBlog.title}
-                      fill
-                      priority
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-
-                <div className="flex items-center gap-2 text-primary font-bold text-sm md:text-base">
-                  <Calendar size={18} />
-                  <time dateTime={new Date(selectedBlog.publishedAt).toISOString()}>
-                    {new Date(selectedBlog.publishedAt).toLocaleDateString('pa-IN', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </time>
+              {/* Modal Dialog Content */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                className="relative w-full max-w-4xl max-h-[85vh] bg-background text-foreground rounded-3xl shadow-2xl border border-foreground/10 overflow-y-auto z-10 flex flex-col my-auto"
+              >
+                {/* Sticky Header with Close Button */}
+                <div className="sticky top-0 z-20 flex items-center justify-between p-4 md:p-6 bg-background/95 backdrop-blur-md border-b border-foreground/10 shadow-sm">
+                  <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-primary">
+                    ਖ਼ਬਰਾਂ ਤੇ ਬਲਾਗ (Blog Post)
+                  </span>
+                  <button
+                    onClick={() => setSelectedBlog(null)}
+                    className="p-2 rounded-full hover:bg-foreground/10 text-foreground/70 hover:text-foreground transition-colors cursor-pointer"
+                    aria-label="Close"
+                  >
+                    <X size={24} />
+                  </button>
                 </div>
 
-                <h2 className="text-2xl md:text-4xl font-bold leading-tight">
-                  {selectedBlog.title}
-                </h2>
+                {/* Modal Body */}
+                <div className="p-6 md:p-10 space-y-6">
+                  {selectedBlog.imageUrl && (
+                    <div className="relative w-full h-[250px] sm:h-[350px] md:h-[420px] rounded-2xl overflow-hidden shadow-md">
+                      <Image
+                        src={selectedBlog.imageUrl}
+                        alt={selectedBlog.title}
+                        fill
+                        priority
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
 
-                <div className="w-20 h-1 bg-primary rounded-full"></div>
-
-                {selectedBlog.excerpt && (
-                  <p className="text-lg md:text-xl text-foreground/80 font-medium leading-relaxed italic border-l-4 border-primary pl-4 md:pl-6 bg-primary/5 py-3 rounded-r-xl">
-                    {selectedBlog.excerpt}
-                  </p>
-                )}
-
-                {selectedBlog.content && (
-                  <div className="prose prose-lg dark:prose-invert max-w-none prose-p:leading-loose text-foreground/90 space-y-4 pt-2">
-                    {selectedBlog.content.split('\n').map((paragraph: string, i: number) => (
-                      paragraph.trim() ? <p key={i} className="text-base md:text-lg leading-relaxed">{paragraph}</p> : null
-                    ))}
+                  <div className="flex items-center gap-2 text-primary font-bold text-sm md:text-base">
+                    <Calendar size={18} />
+                    <time dateTime={new Date(selectedBlog.publishedAt).toISOString()}>
+                      {new Date(selectedBlog.publishedAt).toLocaleDateString('pa-IN', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </time>
                   </div>
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+
+                  <h2 className="text-2xl md:text-4xl font-bold leading-tight">
+                    {selectedBlog.title}
+                  </h2>
+
+                  <div className="w-20 h-1 bg-primary rounded-full"></div>
+
+                  {selectedBlog.excerpt && (
+                    <p className="text-lg md:text-xl text-foreground/80 font-medium leading-relaxed italic border-l-4 border-primary pl-4 md:pl-6 bg-primary/5 py-3 rounded-r-xl">
+                      {selectedBlog.excerpt}
+                    </p>
+                  )}
+
+                  {selectedBlog.content && (
+                    <div className="prose prose-lg dark:prose-invert max-w-none prose-p:leading-loose text-foreground/90 space-y-4 pt-2">
+                      {selectedBlog.content.split('\n').map((paragraph: string, i: number) => (
+                        paragraph.trim() ? <p key={i} className="text-base md:text-lg leading-relaxed">{paragraph}</p> : null
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
