@@ -68,10 +68,20 @@ export default function Media() {
         ]);
 
         if (blogsRes.data.success) {
-          setBlogs(blogsRes.data.data);
+          const sortedBlogs = [...blogsRes.data.data].sort((a, b) => {
+            const timeA = new Date(a.publishedAt || 0).getTime();
+            const timeB = new Date(b.publishedAt || 0).getTime();
+            return timeB - timeA;
+          });
+          setBlogs(sortedBlogs);
         }
         if (videosRes.data.success) {
-          setVideos(videosRes.data.data);
+          const sortedVideos = [...videosRes.data.data].sort((a, b) => {
+            const timeA = new Date(a.publishedAt || 0).getTime();
+            const timeB = new Date(b.publishedAt || 0).getTime();
+            return timeB - timeA;
+          });
+          setVideos(sortedVideos);
         }
       } catch (error) {
         console.error("Failed to fetch media center data", error);
