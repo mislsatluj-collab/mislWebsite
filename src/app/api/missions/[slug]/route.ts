@@ -70,16 +70,16 @@ export async function PUT(
     
     let mission = null;
     if (mongoose.Types.ObjectId.isValid(slug)) {
-      mission = await Mission.findByIdAndUpdate(slug, body, { new: true, runValidators: true });
+      mission = await Mission.findByIdAndUpdate(slug, body, { returnDocument: 'after', runValidators: true });
     }
     if (!mission && mongoose.Types.ObjectId.isValid(decodedSlug)) {
-      mission = await Mission.findByIdAndUpdate(decodedSlug, body, { new: true, runValidators: true });
+      mission = await Mission.findByIdAndUpdate(decodedSlug, body, { returnDocument: 'after', runValidators: true });
     }
     if (!mission) {
-      mission = await Mission.findOneAndUpdate({ slug: decodedSlug }, body, { new: true, runValidators: true });
+      mission = await Mission.findOneAndUpdate({ slug: decodedSlug }, body, { returnDocument: 'after', runValidators: true });
     }
     if (!mission) {
-      mission = await Mission.findOneAndUpdate({ slug }, body, { new: true, runValidators: true });
+      mission = await Mission.findOneAndUpdate({ slug }, body, { returnDocument: 'after', runValidators: true });
     }
     
     if (!mission) {

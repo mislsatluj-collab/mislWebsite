@@ -49,7 +49,7 @@ export async function PUT(
       return NextResponse.json({ success: false, error: "Database not connected" }, { status: 500 });
     }
     
-    const blog = await Blog.findByIdAndUpdate(slug, body, { new: true });
+    const blog = await Blog.findByIdAndUpdate(slug, body, { returnDocument: 'after' });
     if (!blog) {
       return NextResponse.json({ success: false, error: "Blog not found" }, { status: 404 });
     }

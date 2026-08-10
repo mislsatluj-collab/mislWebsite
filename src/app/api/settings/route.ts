@@ -49,7 +49,7 @@ export async function PUT(req: Request) {
     let settings = await Settings.findOneAndUpdate(
       { key: "site_settings" },
       { $set: body },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
 
     return NextResponse.json({ success: true, data: settings });

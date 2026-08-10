@@ -18,7 +18,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     const body = await req.json();
-    const video = await MediaVideo.findByIdAndUpdate(id, body, { new: true, runValidators: true });
+    const video = await MediaVideo.findByIdAndUpdate(id, body, { returnDocument: 'after', runValidators: true });
     
     if (!video) {
       return NextResponse.json({ success: false, error: "Video not found" }, { status: 404 });
