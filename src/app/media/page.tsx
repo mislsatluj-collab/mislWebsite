@@ -221,7 +221,7 @@ export default function Media() {
       {/* Big Popup Window / Modal for Blog Post Details */}
       <AnimatePresence>
         {selectedBlog && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-10 overflow-y-auto">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10 overflow-y-auto">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
